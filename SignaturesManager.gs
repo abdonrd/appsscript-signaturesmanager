@@ -48,6 +48,40 @@ SignaturesManager_.prototype.getSignatureByEmail = function (email) {
 };
 
 /**
+ * Changes the signature of this user's email address.
+ *
+ * @param {string} email The user's email address.
+ * @param {signature} signature The new user's signature.
+ * @return {boolean} True if success or false if failure.
+ */
+SignaturesManager_.prototype.setSignatureByEmail = function (email, signature) {
+    var url = this.buildUrl_(email),
+        payload = this.createPayload_(signature),
+        response;
+
+    try {
+        response = UrlFetchApp.fetch(url, {
+            method: 'PUT',
+            contentType: 'application/atom+xml',
+            headers: {
+                Authorization: 'Bearer ' + this.service_.getAccessToken()
+            },
+            payload: payload
+        });
+    } catch (err) {
+        Logger.log(err);
+        return;
+    }
+
+    if (response.getResponseCode() === 200) {
+        return true;
+    }
+
+    Logger.log('Response code: ' + response.getResponseCode());
+    return false;
+};
+
+/**
  * Builds a signature URL with the scope and the user email to makes the get or
  * set requests to the Google's API.
  *
@@ -77,4 +111,29 @@ SignaturesManager_.prototype.getFromPayload_ = function (payload) {
         appsElement = document.getRootElement().getChild('property', appsNamespace);
 
     return appsElement.getAttribute('value').getValue();
+};
+
+/**
+ * Creates the payload for the get signature function
+ *
+ * @param {string} signature The signature.
+ * @return {string} The signature's payload.
+ * @private
+ */
+SignaturesManager_.prototype.createPayload_ = function (signature) {
+    var atomNamespace = XmlService.getNamespace('atom', 'http://www.w3.org/2005/Atom'),
+        appsNamespace = XmlService.getNamespace('apps', 'http://schemas.google.com/apps/2006'),
+        root = XmlService.createElement('atom').setName('entry'),
+        apps = XmlService.createElement('apps').setName('property');
+
+    root.setNamespace(atomNamespace);
+    root.setNamespace(appsNamespace);
+
+    apps.setAttribute('value', signature);
+
+    root.addContent(apps);
+
+    var document = XmlService.createDocument(root);
+
+    return XmlService.getPrettyFormat().format(document);
 };
