@@ -114,13 +114,37 @@ SignaturesManager_.prototype.getFromPayload_ = function (payload) {
 };
 
 /**
+ * Creates a signature's payload.
+ *
+ * @param {string} signature The signature's value.
+ * @return {string} The signature's payload.
+ * @private
+ */
+SignaturesManager_.prototype.createPayload_ = function (signature) {
+    var appsNamespace = XmlService.getNamespace('apps', 'http://schemas.google.com/apps/2006'),
+        document = XmlService.parse(
+            '<?xml version="1.0" encoding="utf-8"?>' +
+            '<atom:entry xmlns:atom="http://www.w3.org/2005/Atom" xmlns:apps="http://schemas.google.com/apps/2006">' +
+            '    <apps:property name="signature" value="" />' +
+            '</atom:entry>'),
+        appsElement = document.getRootElement().getChild('property', appsNamespace);
+
+    appsElement.getAttribute('value').setValue(signature);
+
+    return XmlService.getPrettyFormat().format(document);
+};
+
+/**
+ * Cant define two namespaces in one the root element
+ * Issue: https://code.google.com/p/google-apps-script-issues/issues/detail?id=3119
+ *
  * Creates the payload for the get signature function
  *
  * @param {string} signature The signature.
  * @return {string} The signature's payload.
  * @private
  */
-SignaturesManager_.prototype.createPayload_ = function (signature) {
+/*SignaturesManager_.prototype.createPayload_ = function (signature) {
     var atomNamespace = XmlService.getNamespace('atom', 'http://www.w3.org/2005/Atom'),
         appsNamespace = XmlService.getNamespace('apps', 'http://schemas.google.com/apps/2006'),
         root = XmlService.createElement('atom').setName('entry'),
@@ -136,4 +160,4 @@ SignaturesManager_.prototype.createPayload_ = function (signature) {
     var document = XmlService.createDocument(root);
 
     return XmlService.getPrettyFormat().format(document);
-};
+};*/
