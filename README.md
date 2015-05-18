@@ -1,7 +1,7 @@
 # SignaturesManager for Google Apps Script
 
 SignaturesManager for Google Apps Script is a library that provides the ability
-to get and set signatures to the users of Google Apps in Google Apps Script.
+to manage the signatures of Google Apps users in Google Apps Script.
 
 
 ## Setup
@@ -34,8 +34,6 @@ function getSignaturesService() {
 
         .setClientId('...')
         .setClientSecret('...')
-
-        .setProjectKey('...')
 
         .setCallbackFunction('authCallback')
 
